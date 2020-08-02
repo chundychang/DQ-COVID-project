@@ -1,5 +1,5 @@
 ---
-title: 'Dataquest: COVID-19 Trends'
+title: 'Dataquest Guided Project: Investigating COVID-19 Virus Trends'
 author: "Cindy Zhang"
 output: 
   pdf_document:
@@ -15,6 +15,8 @@ output:
 ## Introduction
 
 This is my solution to Dataquest's COVID-19 Guided Project from Course 2 (Data Structures in R). It answers the question: **Which countries have had the highest number of positive cases against the number of tests?** 
+
+More details, such as descriptions for variables, can be found in the "ReadMe" file of this project's [repository in GitHub](https://github.com/chundychang/DQ-COVID-project).
 
 ```{r setup, include=FALSE}
 # some of common options (and the defaults) are: 
@@ -43,14 +45,15 @@ covid_df <- data.frame(read.csv("covid19.csv"))
 dim(covid_df)
 vector_cols <- colnames(covid_df)
 vector_cols
-typeof(vector_cols)
 head(covid_df)
 glimpse(covid_df)
 ```
 
-The glimpse() function is useful when exploring a new dataset because it makes it possible to see every column in a data frame and shows as much as it can so that you can visualize what the dataset looks like. 
+After downloading the `covid19.csv` file from Dataquest, I loaded the file and determined the dimension of the dataframe. I stored the column names as `vector_cols`, a `r typeof(vector_cols)` data structure. The glimpse() function is useful when exploring a new dataset because it makes it possible to see every column in a data frame and shows as much as it can so that you can visualize what the dataset looks like. 
 
-## Isolating Rows We Need
+## Isolating the Necessary Rows
+
+As shown in the glimpse of the dataset above, the `Province_State` column mixes country and state/province level data. I was only interested in country-level data, so I filtered `covid_df` for rows that contain `"All States"` in the `Province_State` column and stored it as `covid_df_all_states`. I then deleted `Province_State` from the new dataframe with the assurance that the new dataframe only contained country-level data.
 
 ```{r filter}
 covid_df_all_states <- covid_df %>%
@@ -58,15 +61,17 @@ covid_df_all_states <- covid_df %>%
 covid_df_all_states$Province_State <- NULL
 ```
 
-We can remove `Province_State` without losing information because it does not provide valuable analysis and it doesn't affect other variables in the set.
+## Isolating the Necessary Columns
 
-## Isolating Columns We Need
+From `covid_df_all_states`, I extracted another subset, `covid_df_all_states_daily`, which contained only the dataset columns with daily information to avoid biasing the analysis by comparing daily data to cumulative data. 
 
 ```{r dailymeasure}
 covid_df_all_states_daily <- subset(covid_df_all_states, select = c(Date, Country_Region, active, hospitalizedCurr, daily_tested, daily_positive))
 ```
 
 ## Extracting Top Ten Tested Cases Countries
+
+I calculated the sum of COVID-109 tested, positive, active, and hospitalized cases by country using the daily data; from the sum calculations, I extracted the top ten countries with the highest sums.
 
 ```{r dailysum}
 covid_df_all_states_daily_sum <- covid_df_all_states_daily %>%
@@ -79,6 +84,8 @@ covid_top_10
 ```
 
 ## Identifying the Highest Positive Against Tested Cases
+
+I extracted vectors from `covid_top_10` that allowed me to calculate the ratio of positive cases to tested cases and determine which three countries had the highest ratios.
 
 ```{r vector}
 countries <- covid_top_10$Country_Region
@@ -102,6 +109,8 @@ positive_tested_top_3 <- positive_tested_ratio[1:3]
 
 ## Keeping Relevant Information
 
+I created a matrix that contained just the top three countries' COVID-19 information:
+
 ```{r vectortomatrix}
 united_kingdom <- c(0.11, 1473672, 166909, 0, 0)
 united_states <- c(0.10, 17282363, 1877179, 0, 0)
@@ -111,7 +120,9 @@ colnames(covid_mat) <- c("Ratio", "tested", "positive", "active", "hospitalized"
 covid_mat
 ```
 
-## Putting All Together
+## Putting It All Together
+
+Lastly, I stored all answers and datasets together in one list, `covid_analysis_list`. The second element of this list is printed below the code:
 
 ```{r list}
 question <- "Which countries have had the highest number of positive cases against the number of tests?"
